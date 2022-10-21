@@ -10,6 +10,9 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Mailgun\Mailgun;
+use Mail;
+// use Illuminate\Support\Facades\Mail;
 
 
 class UserController extends Controller
@@ -109,50 +112,39 @@ class UserController extends Controller
 
     }
     public function signin(Request $request){
-        // $user=User::;
+        $user = User::where('email', $request->email)->first();
+        if(isset($user->user_id)){
+            $check=Hash::check($request->password, $user->password);
+           
+            if($check){
+                return response()->json([
+                    'status'=>200,
+                    'token'=>$user->token,
+                    'message'=>"user found"
+                ]);
+            }else{
+                return response()->json([
+                    'status'=>403,
+                    'message'=>"Invalid email or password"
+                ]);
+            }
+            
+        }else{
+            return response()->json([
+                'status'=>403,
+                'message'=>"Invalid email"
+            ]);
+        }
     }
 
     public function forgot_pass(){
-       //Load Composer's autoloader
-require 'PHPMailer/vendor/autoload.php';
 
-//Create an instance; passing `true` enables exceptions
-$mail = new PHPMailer(true);
-
-try {
-    //Server settings
-    $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-    $mail->isSMTP();                                            //Send using SMTP
-    $mail->Host       = 'http://128.199.158.35:10000/';                     //Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-    $mail->Username   = 'joynfuntogether';                     //SMTP username
-    $mail->Password   = 'joynfuntogethergmail@123';                               //SMTP password
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-    $mail->Port       = 587;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
-
-    //Recipients
-    $mail->setFrom('joynfuntogether@gmail.com', 'Mailer');
-    $mail->addAddress('mustafailahi586@gmail.com', 'Joe User');     //Add a recipient
-    // $mail->addAddress('ellen@example.com');               //Name is optional
-    // $mail->addReplyTo('info@example.com', 'Information');
-    // $mail->addCC('cc@example.com');
-    // $mail->addBCC('bcc@example.com');
-
-    //Attachments
-    // $mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
-    // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name
-
-    //Content
-    $mail->isHTML(true);                                  //Set email format to HTML
-    $mail->Subject = 'Here is the subject';
-    $mail->Body    = 'This is the HTML message body <b>in bold!</b>';
-    // $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-
-    $mail->send();
-    echo 'Message has been sent';
-} catch (Exception $e) {
-    echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-}
+        $data=['name'=>"maha"];
+        $user['to']='ds.php.maha@gmail.com';
+        Mail::send('mail',$data,function($messages) use ($user){
+            $messages->to($user['to']);
+            $messages->subject('hello maha');
+        });
 
 }
 public function user_details(){
@@ -462,4 +454,29 @@ public function update_med_rec(Request $request){
         ],403);
     }
 }
+public function coupon_check(Request $request){
+    $token= $_SERVER['HTTP_AUTHORIZATION'];
+    if($token != ""){
+        $coupon=User::where("promo_code",$request->coupon)->first();
+        if(isset($coupon->user_id)){
+            return response()->json([
+                "status"=>200,
+                "message"=>"Valid coupon"
+            ],200);
+        }else{
+            return response()->json([
+                "status"=>403,
+                "message"=>"Invalid coupon"
+            ],403);
+        }
+    }else{
+        return response()->json([
+            "status"=>403,
+            "message"=>"Token should be provided"
+        ],403);
+    }
+    
+}
+
+
 }
