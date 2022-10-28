@@ -27,7 +27,9 @@ class UserController extends Controller
                                 if($request->phone_type != ""){
                                     if($request->dob != ""){
                                     if($request->fingerprint != ""){
-                                        $pass=Hash::make($request->password);
+                                        $email_check=User::where('email',$request->email)->first();
+                                        if(!isset($email_check->user_id)){
+                                            $pass=Hash::make($request->password);
                                         $token=Hash::make($request->email);
                                         $promo=random_int(01, 99);
                                         User::create([
@@ -45,6 +47,7 @@ class UserController extends Controller
                                             "phone_type"=>$request->phone_type,
                                             "date_of_birth"=>$request->dob,
                                             "fingerprint"=>$request->fingerprint,
+                                            "channel"=>$request->channel
                                         ]);
                                         // \Mail::send('email-template',)
                                         return response()->json([
@@ -52,7 +55,13 @@ class UserController extends Controller
                                             "token"=>$token,
                                             "message"=>"Registration done successfully"
                                         ],200);
-
+                                        }else{
+                                            return response()->json([
+                                                "status"=>403,
+                                                "message"=>"Email already exists "
+                                            ],403);
+    
+                                        }
                                     }else{
                                         return response()->json([
                                             "status"=>403,
@@ -137,16 +146,31 @@ class UserController extends Controller
         }
     }
 
-    public function forgot_pass(){
+    public function forgot_pass(Request $request){
 
-        $data=['name'=>"maha"];
-        $user['to']='ds.php.maha@gmail.com';
-        Mail::send('mail',$data,function($messages) use ($user){
-            $messages->to($user['to']);
-            $messages->subject('hello maha');
-        });
-
-}
+        $user=User::where('email',$request->email)->first();
+        if(isset($user->user_id)){
+        $code=random_int(1000,9999);
+        User::where('token',$user->user_id)->update([
+        'code'=>$code
+        ]);
+            $data=['name'=>$user->first_name,'code'=>$code];
+            $user['to']=$user->email;
+           $send= Mail::send('mail',$data,function($messages) use ($user){
+                $messages->to($user['to']);
+                $messages->subject('Password Recovery');
+            });
+        return response()->json([
+            "status"=>200,
+            "message"=>"Check your email we have sent a code"
+            ],200);
+        }else{
+         return response()->json([
+            "status"=>403,
+            "message"=>"Invalid email"
+            ],403);
+             }
+        }   
 public function user_details(){
     $token=$_SERVER['HTTP_AUTHORIZATION'];
     if($token != ""){
@@ -477,6 +501,33 @@ public function coupon_check(Request $request){
     }
     
 }
-
+public function check_code(Request $request){
+    if($request->email){
+        if($request->code){
+            $user=User::where('email',$request->email)->first();
+            if($user->code == $request->code){
+                return response()->json([
+                    "status"=>200,
+                    "message"=>"Valid code"
+                ],200);
+            }else{
+                return response()->json([
+                    "status"=>403,
+                    "message"=>"Invalid code"
+                ],403);
+            }
+        }else{
+        return response()->json([
+            "status"=>403,
+            "message"=>"Code should be provided"
+        ],403);
+    }
+    }else{
+        return response()->json([
+            "status"=>403,
+            "message"=>"Email should be provided"
+        ],403);
+    }
+}
 
 }

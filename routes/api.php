@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\UserController;
 use App\Http\Controllers\API\TrainerController;
 use App\Http\Controllers\API\VisitController;
+use App\Http\Controllers\API\ChatController;
+use App\Http\Controllers\API\AppointmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,7 +24,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::post('signup', [UserController::class,'signup']);
 Route::post('signin', [UserController::class,'signin']);
-Route::get('forgot_pass', [UserController::class,'forgot_pass']);
+Route::post('forgot_pass', [UserController::class,'forgot_pass']);
+Route::post('check_code', [UserController::class,'check_code']);
 Route::get('user_details', [UserController::class,'user_details']);
 Route::post('update_username', [UserController::class,'update_username']);
 Route::post('update_email', [UserController::class,'update_email']);
@@ -36,9 +39,10 @@ Route::get('trainertype', [TrainerController::class,'trainertype']);
 Route::get('trainersList/{type}', [TrainerController::class,'trainersList']);
 Route::get('trainerDesc/{id}', [TrainerController::class,'trainerDesc']);
 Route::get('trainers', [TrainerController::class,'trainers']);
+Route::get('Slots', [TrainerController::class,'Slots']);
 Route::post('trTimeSlots/{id}', [TrainerController::class,'trTimeSlots']);
 Route::post('trCalenderSlots', [TrainerController::class,'trCalenderSlots']);
-Route::get('reciept', [VisitController::class,'reciept']);
+Route::get('receipt', [VisitController::class,'receipt']);
 Route::get('questionary', [VisitController::class,'questionary']);
 Route::post('question', [VisitController::class,'question']);
 Route::post('create_visit', [VisitController::class,'create_visit']);
@@ -49,3 +53,7 @@ Route::get('past_visit', [VisitController::class,'past_visit']);
 Route::post('app_rating', [TrainerController::class,'app_rating']);
 Route::get('all_trCalenderSlots', [TrainerController::class,'all_trCalenderSlots']);
 Route::post('coupon_check', [UserController::class,'coupon_check']);
+Route::get('chat_display', [ChatController::class,'chat_display']);
+Route::post('msg_sent', [ChatController::class,'msg_sent']);
+Route::post('appointment', [AppointmentController::class,'appointment']);
+

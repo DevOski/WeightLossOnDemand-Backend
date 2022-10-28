@@ -27,6 +27,14 @@ class TrainerController extends Controller
             'data'=>$all_tr
         ]);
     }
+    public function Slots()
+    {
+        $all_Slot=TrainersSlot::get();
+        return response()->json([
+            'status'=>200,
+            'data'=>$all_Slot
+        ]);
+    }
     public function trTimeSlots($id){
         $tr_slots=TrainersSlot::where('tr_id', $id)->get();
         return response()->json([
@@ -65,11 +73,12 @@ class TrainerController extends Controller
         ]);
     }
     public function trainerDesc($id){
-        $trainers=Trainer::where('tr_id',$id)->get();
+        $trainers=Trainer::where('tr_id',$id)->first();
         $trainerSlot=TrainersSlot::where('tr_id',$id)->get();
         return response()->json([
             'status'=>200,
-            'data'=>[$trainers,$trainerSlot]
+            'trainers'=>$trainers,
+            'slots'=>$trainerSlot
         ],200);
     }
     public function tr_rating(Request $request){
@@ -126,6 +135,9 @@ class TrainerController extends Controller
                     'message'=>"Slot date should be provided"
                 ],403);    
             }
+            // $d1=$chat->created_at->format('l');
+            // $d1=$chat->created_at->format('H:i:s');
+            // $d1=$chat->created_at->format('d-m-Y');
        
     }
 }

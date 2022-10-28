@@ -14,13 +14,12 @@ use Illuminate\Support\Facades\Hash;
 
 class VisitController extends Controller
 {
- public function reciept(){
+ public function receipt(Request $request){
     $data = [
-        'title' => 'Welcome to ItSolutionStuff.com',
-        'date' => date('m/d/Y')
+        'name' => 'Welcome to ItSolutionStuff.com',
+        'code' => date('m/d/Y')
     ];
-      
-    $pdf = PDF::loadHTML('<h1>full reciept</h1>');
+    $pdf = PDF::loadView('simpleReceipt',$data);
 
     return $pdf->download('mustafa.pdf');
  }
@@ -176,6 +175,7 @@ class VisitController extends Controller
  
  public function visit_reason(){
     $reason=VisitReason::get();
+
     return response()->json([
         'status'=>200,
         'data'=>$reason,
@@ -184,10 +184,21 @@ class VisitController extends Controller
  }
  public function search_reason(Request $request){
     $reason=VisitReason::where('vr_opts','LIKE','%'.$request->param.'%')->get();
-    return response()->json([
-        'status'=>200,
-        'data'=>$reason,
-    ]);
+    if(!$reason->isEmpty()){
+        return response()->json([
+            'status'=>200,
+            'data'=>$reason,
+        ]);
+    }else{
+        return response()->json([
+            'status'=>403,
+            'message'=>"Opps! No result found",
+        ],403);
+    }
+    // return response()->json([
+    //     'status'=>200,
+    //     'data'=>$reason,
+    // ]);
  }
  public function past_visit(){
     $token=$_SERVER['HTTP_AUTHORIZATION'];
@@ -196,6 +207,7 @@ class VisitController extends Controller
         if(isset($user->user_id)){
             $details=Visit::where('user_token',$token)->orderBy('created_at','DESC')->first();
             $trainer=Trainer::where('tr_id',$details->trainer_id)->get();
+            
             return response()->json([
                 'status'=>200,
                 'visit'=>$details,

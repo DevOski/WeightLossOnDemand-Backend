@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+
 
 class Appointment extends Model
 {
@@ -23,15 +26,16 @@ class Appointment extends Model
         'response_5',
         'trainer_id',
         'tr_name',
-        'visit_token',
+        'apt_token',
         'habbits',
         'drugs_alergies',
         'medications',
         'medical_conditions',
         'surgeries',
         'apt_token',
-        'ap_time',
-        'ap_date'
+        'apt_time',
+        'apt_day',
+        'apt_date'
         
     ];
 
